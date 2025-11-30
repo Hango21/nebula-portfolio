@@ -19,6 +19,7 @@ import Contact from "./pages/Contact";
 // Admin pages
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
+import AdminProfile from "./pages/admin/Profile";
 import AdminProjects from "./pages/admin/Projects";
 import ProjectForm from "./pages/admin/ProjectForm";
 import AdminBlog from "./pages/admin/Blog";
@@ -55,6 +56,14 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/profile"
+                  element={
+                    <ProtectedRoute>
+                      <AdminProfile />
                     </ProtectedRoute>
                   }
                 />

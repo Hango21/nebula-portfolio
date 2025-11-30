@@ -2,8 +2,17 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Code, Rocket, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { getProfile } from "@/utils/profile";
+import { ProfileData } from "@/types/profile";
 
 export default function Home() {
+  const [profile, setProfile] = useState<ProfileData>(getProfile());
+
+  useEffect(() => {
+    setProfile(getProfile());
+  }, []);
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -41,17 +50,25 @@ export default function Home() {
               transition={{ delay: 0.3, duration: 0.8 }}
               className="font-orbitron text-5xl md:text-7xl font-bold mb-6 text-glow-cyan"
             >
-              Full Stack Developer
+              {profile.name}
             </motion.h1>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.8 }}
+              className="text-2xl md:text-3xl text-secondary font-orbitron font-semibold mb-6"
+            >
+              {profile.title}
+            </motion.div>
 
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.8 }}
-              className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed"
+              className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed max-w-3xl mx-auto"
             >
-              Crafting innovative digital experiences with modern web technologies.
-              Specializing in React, Node.js, and cloud infrastructure.
+              {profile.bio.split('.')[0]}.
             </motion.p>
 
             <motion.div
