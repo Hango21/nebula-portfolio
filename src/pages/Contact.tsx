@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,14 +8,21 @@ import { toast } from "sonner";
 import emailjs from "@emailjs/browser";
 import { EMAILJS_CONFIG } from "@/config/emailjs";
 import { addMessage } from "@/utils/storage";
+import { getProfile } from "@/utils/profile";
+import { ProfileData } from "@/types/profile";
 
 export default function Contact() {
+  const [profile, setProfile] = useState<ProfileData>(getProfile());
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     message: "",
   });
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setProfile(getProfile());
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,7 +99,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-semibold mb-1">Email</h3>
-                    <p className="text-muted-foreground">contact@example.com</p>
+                    <p className="text-muted-foreground">{profile.email}</p>
                   </div>
                 </div>
 
@@ -102,7 +109,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-semibold mb-1">Phone</h3>
-                    <p className="text-muted-foreground">+1 (555) 123-4567</p>
+                    <p className="text-muted-foreground">{profile.phone}</p>
                   </div>
                 </div>
 
@@ -112,7 +119,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-semibold mb-1">Location</h3>
-                    <p className="text-muted-foreground">San Francisco, CA</p>
+                    <p className="text-muted-foreground">{profile.location}</p>
                   </div>
                 </div>
               </div>

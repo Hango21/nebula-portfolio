@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
 import { Download, Briefcase, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { getProfile } from "@/utils/profile";
+import { ProfileData } from "@/types/profile";
 
 const skills = [
   { name: "React", level: 95 },
@@ -40,6 +43,12 @@ const education = [
 ];
 
 export default function About() {
+  const [profile, setProfile] = useState<ProfileData>(getProfile());
+
+  useEffect(() => {
+    setProfile(getProfile());
+  }, []);
+
   return (
     <div className="min-h-screen py-24">
       <div className="container mx-auto px-4">
@@ -64,8 +73,8 @@ export default function About() {
           >
             <div className="aspect-square rounded-lg overflow-hidden border-gradient">
               <img
-                src="https://i.pinimg.com/736x/0d/7a/c0/0d7ac03da06b6b967b4008d5b7682fd3.jpg"
-                alt="Profile"
+                src={profile.profileImage}
+                alt={profile.name}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -78,22 +87,19 @@ export default function About() {
             className="flex flex-col justify-center"
           >
             <h2 className="font-orbitron text-3xl font-bold mb-4">
-              Hi, I'm a Full Stack Developer
+              Hi, I'm {profile.name}
             </h2>
             <p className="text-muted-foreground mb-6 leading-relaxed">
-              With over 5 years of experience in web development, I specialize in creating
-              elegant, efficient, and scalable solutions. My passion lies in transforming
-              complex problems into simple, beautiful, and intuitive designs.
+              {profile.bio}
             </p>
-            <p className="text-muted-foreground mb-6 leading-relaxed">
-              I have a strong foundation in both frontend and backend technologies, with
-              expertise in React, Node.js, TypeScript, and cloud platforms. I'm constantly
-              learning and adapting to new technologies to deliver the best solutions.
-            </p>
-            <Button className="btn-glow-cyan w-fit">
-              <Download className="mr-2 w-4 h-4" />
-              Download CV
-            </Button>
+            {profile.cvUrl && (
+              <a href={profile.cvUrl} target="_blank" rel="noopener noreferrer">
+                <Button className="btn-glow-cyan w-fit">
+                  <Download className="mr-2 w-4 h-4" />
+                  Download CV
+                </Button>
+              </a>
+            )}
           </motion.div>
         </div>
 

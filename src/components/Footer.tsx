@@ -1,7 +1,15 @@
 import { Github, Linkedin, Twitter, Mail } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getProfile } from "@/utils/profile";
+import { ProfileData } from "@/types/profile";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [profile, setProfile] = useState<ProfileData>(getProfile());
+
+  useEffect(() => {
+    setProfile(getProfile());
+  }, []);
 
   return (
     <footer className="bg-card/50 border-t border-border/50 py-8">
@@ -13,7 +21,7 @@ export const Footer = () => {
 
           <div className="flex items-center gap-6">
             <a
-              href="https://github.com"
+              href={profile.github}
               target="_blank"
               rel="noopener noreferrer"
               className="text-foreground/60 hover:text-primary transition-colors"
@@ -21,7 +29,7 @@ export const Footer = () => {
               <Github size={20} />
             </a>
             <a
-              href="https://linkedin.com"
+              href={profile.linkedin}
               target="_blank"
               rel="noopener noreferrer"
               className="text-foreground/60 hover:text-primary transition-colors"
@@ -29,7 +37,7 @@ export const Footer = () => {
               <Linkedin size={20} />
             </a>
             <a
-              href="https://twitter.com"
+              href={profile.twitter}
               target="_blank"
               rel="noopener noreferrer"
               className="text-foreground/60 hover:text-primary transition-colors"
@@ -37,7 +45,7 @@ export const Footer = () => {
               <Twitter size={20} />
             </a>
             <a
-              href="mailto:contact@example.com"
+              href={`mailto:${profile.email}`}
               className="text-foreground/60 hover:text-primary transition-colors"
             >
               <Mail size={20} />
