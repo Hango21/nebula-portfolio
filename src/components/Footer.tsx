@@ -2,6 +2,7 @@ import { Github, Linkedin, Twitter, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getProfile } from "@/utils/profile";
 import { ProfileData } from "@/types/profile";
+import { Logo } from "./Logo";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -15,9 +16,7 @@ export const Footer = () => {
     <footer className="bg-card/50 border-t border-border/50 py-8">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="font-orbitron text-lg font-bold text-glow-cyan">
-            PORTFOLIO
-          </div>
+          <Logo size="sm" />
 
           <div className="flex items-center gap-6">
             <a

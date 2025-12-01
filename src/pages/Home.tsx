@@ -5,12 +5,16 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { getProfile } from "@/utils/profile";
 import { ProfileData } from "@/types/profile";
+import { getServices } from "@/utils/storage";
+import type { Service } from "@/types";
 
 export default function Home() {
   const [profile, setProfile] = useState<ProfileData>(getProfile());
+  const [services, setServices] = useState<Service[]>([]);
 
   useEffect(() => {
     setProfile(getProfile());
+    setServices(getServices());
   }, []);
 
   return (
@@ -122,15 +126,42 @@ export default function Home() {
         </motion.div>
       </section>
 
+      {/* Services Preview Section */}
+      <section className="py-20 border-t border-border/50">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-10">
+            <h2 className="font-orbitron text-3xl font-bold">Services</h2>
+            <Link to="/services">
+              <Button variant="outline">See all services</Button>
+            </Link>
+          </div>
+          {services.length === 0 ? (
+            <div className="text-center text-muted-foreground">No services yet. Check back soon.</div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {services.slice(0, 6).map((s, i) => (
+                <motion.div
+                  key={s.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
+                  className="card-gradient p-6 rounded-lg border border-border/50 hover-lift"
+                >
+                  <div className="font-orbitron text-xl font-bold text-primary mb-2">{s.title}</div>
+                  <p className="text-muted-foreground line-clamp-3">{s.description}</p>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* Quick Stats Section */}
       <section className="py-20 border-t border-border/50">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { number: "50+", label: "Projects Completed" },
-              { number: "5+", label: "Years Experience" },
-              { number: "100%", label: "Client Satisfaction" },
-            ].map((stat, index) => (
+            {(profile.stats || []).map((stat, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}

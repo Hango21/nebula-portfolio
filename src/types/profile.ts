@@ -1,3 +1,27 @@
+export interface Experience {
+  id: string;
+  role: string;
+  company: string;
+  start: string;
+  end?: string;
+  description?: string;
+}
+
+export interface Education {
+  id: string;
+  degree: string;
+  institution: string;
+  start: string;
+  end?: string;
+  description?: string;
+}
+
+export interface Stat {
+  id: string;
+  number: string;
+  label: string;
+}
+
 export interface ProfileData {
   name: string;
   title: string;
@@ -10,6 +34,9 @@ export interface ProfileData {
   linkedin: string;
   twitter: string;
   cvUrl?: string;
+  experience?: Experience[];
+  education?: Education[];
+  stats?: Stat[];
 }
 
 export const DEFAULT_PROFILE: ProfileData = {
@@ -23,4 +50,11 @@ export const DEFAULT_PROFILE: ProfileData = {
   github: "https://github.com",
   linkedin: "https://linkedin.com",
   twitter: "https://twitter.com",
+  experience: [],
+  education: [],
+  stats: [
+    { id: "stat-projects", number: "50+", label: "Projects Completed" },
+    { id: "stat-years", number: "5+", label: "Years Experience" },
+    { id: "stat-satisfaction", number: "100%", label: "Client Satisfaction" },
+  ],
 };

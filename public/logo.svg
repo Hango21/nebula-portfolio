@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g1" x1="16" y1="32" x2="240" y2="224" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22d3ee"/>
+      <stop offset="0.6" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#e879f9"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="28" fill="url(#g1)" fill-opacity="0.14" stroke="url(#g1)" stroke-opacity="0.35"/>
+  <g filter="url(#glow)">
+    <path d="M64 184V72h20v42h40V72h20v112h-20v-50H84v50H64z" fill="url(#g1)"/>
+    <path d="M152 72h20v36h20V72h20v112h-20v-56h-20v56h-20V72z" fill="url(#g1)"/>
+  </g>
+  <title>HM - Hamdi Mohammed</title>
+</svg>

@@ -129,7 +129,8 @@ export default function Contact() {
               <h3 className="font-orbitron text-xl font-bold mb-4">Business Hours</h3>
               <div className="space-y-2 text-muted-foreground">
                 <p>Monday - Friday: 9:00 AM - 6:00 PM</p>
-                <p>Saturday - Sunday: Closed</p>
+                <p>Saturday: 9:00 AM - 12:00 PM</p>
+                <p> Sunday: Closed</p>
               </div>
             </div>
           </motion.div>
@@ -149,7 +150,7 @@ export default function Contact() {
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="John Doe"
+                  placeholder="Hamdi Mohammed"
                   required
                 />
               </div>
@@ -163,7 +164,7 @@ export default function Contact() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="john@example.com"
+                  placeholder="hamdi@example.com"
                   required
                 />
               </div>

@@ -12,8 +12,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Projects from "./pages/Projects";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
+import Services from "./pages/Services";
 import Contact from "./pages/Contact";
 
 // Admin pages
@@ -25,6 +24,8 @@ import ProjectForm from "./pages/admin/ProjectForm";
 import AdminBlog from "./pages/admin/Blog";
 import BlogForm from "./pages/admin/BlogForm";
 import AdminMessages from "./pages/admin/Messages";
+import AdminServices from "./pages/admin/Services";
+import ServiceForm from "./pages/admin/ServiceForm";
 
 import NotFound from "./pages/NotFound";
 
@@ -45,8 +46,7 @@ const App = () => (
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/projects" element={<Projects />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:id" element={<BlogPost />} />
+                <Route path="/services" element={<Services />} />
                 <Route path="/contact" element={<Contact />} />
 
                 {/* Admin Routes */}
@@ -72,6 +72,30 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <AdminProjects />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/services"
+                  element={
+                    <ProtectedRoute>
+                      <AdminServices />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/services/new"
+                  element={
+                    <ProtectedRoute>
+                      <ServiceForm />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/services/edit/:id"
+                  element={
+                    <ProtectedRoute>
+                      <ServiceForm />
                     </ProtectedRoute>
                   }
                 />

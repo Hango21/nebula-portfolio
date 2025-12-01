@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, FolderOpen, FileText, Mail, User } from "lucide-react";
+import { LayoutDashboard, FolderOpen, FileText, Mail, User, Wrench } from "lucide-react";
 
 const navItems = [
   { name: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
   { name: "Profile", path: "/admin/profile", icon: User },
   { name: "Projects", path: "/admin/projects", icon: FolderOpen },
+  { name: "Services", path: "/admin/services", icon: Wrench },
   { name: "Blog", path: "/admin/blog", icon: FileText },
   { name: "Messages", path: "/admin/messages", icon: Mail },
 ];

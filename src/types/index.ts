@@ -27,3 +27,11 @@ export interface ContactMessage {
   date: string;
   read: boolean;
 }
+
+export interface Service {
+  id: string;
+  title: string;
+  description: string;
+  icon: string; // lucide-react icon name key
+  createdAt: string;
+}

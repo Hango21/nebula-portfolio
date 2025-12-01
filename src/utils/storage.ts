@@ -1,9 +1,10 @@
-import { Project, BlogPost, ContactMessage } from "@/types";
+import { Project, BlogPost, ContactMessage, Service } from "@/types";
 
 const STORAGE_KEYS = {
   PROJECTS: "portfolio_projects",
   BLOGS: "portfolio_blogs",
   MESSAGES: "portfolio_messages",
+  SERVICES: "portfolio_services",
 };
 
 // Projects
@@ -113,4 +114,40 @@ export const markMessageAsRead = (id: string, read: boolean) => {
 export const deleteMessage = (id: string) => {
   const messages = getMessages().filter((m) => m.id !== id);
   saveMessages(messages);
+};
+
+// Services
+export const getServices = (): Service[] => {
+  const stored = localStorage.getItem(STORAGE_KEYS.SERVICES);
+  return stored ? JSON.parse(stored) : [];
+};
+
+export const saveServices = (services: Service[]) => {
+  localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(services));
+};
+
+export const addService = (service: Omit<Service, "id" | "createdAt">): Service => {
+  const services = getServices();
+  const newService: Service = {
+    ...service,
+    id: Date.now().toString(),
+    createdAt: new Date().toISOString(),
+  };
+  services.unshift(newService);
+  saveServices(services);
+  return newService;
+};
+
+export const updateService = (id: string, updates: Partial<Service>) => {
+  const services = getServices();
+  const index = services.findIndex((s) => s.id === id);
+  if (index !== -1) {
+    services[index] = { ...services[index], ...updates };
+    saveServices(services);
+  }
+};
+
+export const deleteService = (id: string) => {
+  const services = getServices().filter((s) => s.id !== id);
+  saveServices(services);
 };

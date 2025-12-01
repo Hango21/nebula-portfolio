@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Upload, X, Save } from "lucide-react";
+import { Upload, X, Save, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,12 +8,14 @@ import { AdminNav } from "@/components/admin/AdminNav";
 import { getProfile, saveProfile } from "@/utils/profile";
 import { uploadToCloudinary } from "@/config/cloudinary";
 import { toast } from "sonner";
-import { ProfileData } from "@/types/profile";
+import { ProfileData, Experience, Education } from "@/types/profile";
 
 export default function AdminProfile() {
   const [profile, setProfile] = useState<ProfileData>(getProfile());
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [prevExperience, setPrevExperience] = useState<Experience[] | null>(null);
+  const [prevEducation, setPrevEducation] = useState<Education[] | null>(null);
 
   useEffect(() => {
     setProfile(getProfile());
@@ -71,6 +73,38 @@ export default function AdminProfile() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    // Simple validation rules
+    const monthYear = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{4}$/;
+    const yearOnly = /^\d{4}$/;
+    const isValidDate = (v?: string) => !v || v === "Present" || monthYear.test(v) || yearOnly.test(v);
+
+    // Experience validation
+    for (const exp of profile.experience || []) {
+      if (!exp.role?.trim() || !exp.company?.trim() || !exp.start?.trim()) {
+        toast.error("Experience entries require Role, Company, and Start date.");
+        setSaving(false);
+        return;
+      }
+      if (!isValidDate(exp.start) || !isValidDate(exp.end)) {
+        toast.error("Use YYYY or Mon YYYY for dates (e.g., 2021 or Jan 2021). End can be 'Present'.");
+        setSaving(false);
+        return;
+      }
+    }
+
+    // Education validation
+    for (const edu of profile.education || []) {
+      if (!edu.degree?.trim() || !edu.institution?.trim() || !edu.start?.trim()) {
+        toast.error("Education entries require Degree, Institution, and Start date.");
+        setSaving(false);
+        return;
+      }
+      if (!isValidDate(edu.start) || !isValidDate(edu.end)) {
+        toast.error("Use YYYY or Mon YYYY for dates (e.g., 2017 or Sep 2019). End can be 'Present'.");
+        setSaving(false);
+        return;
+      }
+    }
 
     try {
       saveProfile(profile);
@@ -79,6 +113,37 @@ export default function AdminProfile() {
       toast.error("Failed to save profile");
     } finally {
       setSaving(false);
+    }
+  };
+
+  // ----- Drag & Drop Reordering -----
+  const onDragStart = (e: React.DragEvent<HTMLDivElement>, index: number, section: "experience" | "education") => {
+    e.dataTransfer.setData("index", String(index));
+    e.dataTransfer.setData("section", section);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const onDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number, section: "experience" | "education") => {
+    e.preventDefault();
+    const dragIndex = Number(e.dataTransfer.getData("index"));
+    const dragSection = e.dataTransfer.getData("section");
+    if (dragSection !== section || Number.isNaN(dragIndex)) return;
+
+    if (section === "experience") {
+      const list = [...(profile.experience || [])];
+      const [moved] = list.splice(dragIndex, 1);
+      list.splice(dropIndex, 0, moved);
+      setProfile({ ...profile, experience: list });
+    } else {
+      const list = [...(profile.education || [])];
+      const [moved] = list.splice(dragIndex, 1);
+      list.splice(dropIndex, 0, moved);
+      setProfile({ ...profile, education: list });
     }
   };
 
@@ -148,6 +213,88 @@ export default function AdminProfile() {
                     Recommended: Square image, at least 400x400px
                   </p>
                 </div>
+              </div>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="card-gradient p-6 rounded-lg space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-orbitron text-xl font-bold">Quick Stats</h2>
+                <div className="flex items-center gap-2">
+                  {(profile.stats || []).length > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        if (window.confirm("Remove all stats?")) {
+                          setProfile({ ...profile, stats: [] });
+                        }
+                      }}
+                    >
+                      Clear All
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      setProfile({
+                        ...profile,
+                        stats: [
+                          ...(profile.stats || []),
+                          { id: Date.now().toString(), number: "", label: "" },
+                        ],
+                      })
+                    }
+                  >
+                    Add Stat
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid gap-4">
+                {(profile.stats || []).map((st, idx) => (
+                  <div key={st.id} className="p-4 rounded-lg bg-card/40 border border-border/50">
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Number</label>
+                        <Input
+                          value={st.number}
+                          onChange={(e) => {
+                            const next = [...(profile.stats || [])];
+                            next[idx] = { ...next[idx], number: e.target.value };
+                            setProfile({ ...profile, stats: next });
+                          }}
+                          placeholder="e.g., 50+"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium mb-2">Label</label>
+                        <Input
+                          value={st.label}
+                          onChange={(e) => {
+                            const next = [...(profile.stats || [])];
+                            next[idx] = { ...next[idx], label: e.target.value };
+                            setProfile({ ...profile, stats: next });
+                          }}
+                          placeholder="e.g., Projects Completed"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end mt-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          const next = (profile.stats || []).filter((x) => x.id !== st.id);
+                          setProfile({ ...profile, stats: next });
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -249,6 +396,314 @@ export default function AdminProfile() {
                   onChange={(e) => setProfile({ ...profile, twitter: e.target.value })}
                   placeholder="https://twitter.com/username"
                 />
+              </div>
+            </div>
+
+            {/* Experience */}
+            <div className="card-gradient p-6 rounded-lg space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-orbitron text-xl font-bold">Experience</h2>
+                <div className="flex items-center gap-2">
+                  {(profile.experience || []).length > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        if (window.confirm("Remove all experience entries?")) {
+                          setPrevExperience([...(profile.experience || [])]);
+                          setProfile({ ...profile, experience: [] });
+                          toast.message("Cleared experience", { description: "Click Undo to restore." });
+                        }
+                      }}
+                    >
+                      Clear All
+                    </Button>
+                  )}
+                  {prevExperience && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setProfile({ ...profile, experience: prevExperience });
+                        setPrevExperience(null);
+                        toast.success("Experience restored");
+                      }}
+                    >
+                      Undo Clear
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      setProfile({
+                        ...profile,
+                        experience: [
+                          ...(profile.experience || []),
+                          {
+                            id: Date.now().toString(),
+                            role: "",
+                            company: "",
+                            start: "",
+                            end: "",
+                            description: "",
+                          },
+                        ],
+                      })
+                    }
+                  >
+                    Add Experience
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                {(profile.experience || []).map((exp, idx) => (
+                  <div
+                    key={exp.id}
+                    className="p-4 rounded-lg bg-card/40 border border-border/50 space-y-3"
+                    draggable
+                    onDragStart={(e) => onDragStart(e, idx, "experience")}
+                    onDragOver={onDragOver}
+                    onDrop={(e) => onDrop(e, idx, "experience")}
+                  >
+                    <div className="flex items-center gap-2 text-foreground/60">
+                      <GripVertical className="h-4 w-4" />
+                      <span className="text-xs">Drag to reorder</span>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Role</label>
+                        <Input
+                          value={exp.role}
+                          onChange={(e) => {
+                            const next = [...(profile.experience || [])];
+                            next[idx] = { ...next[idx], role: e.target.value };
+                            setProfile({ ...profile, experience: next });
+                          }}
+                          placeholder="Senior Full Stack Developer"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Company</label>
+                        <Input
+                          value={exp.company}
+                          onChange={(e) => {
+                            const next = [...(profile.experience || [])];
+                            next[idx] = { ...next[idx], company: e.target.value };
+                            setProfile({ ...profile, experience: next });
+                          }}
+                          placeholder="Tech Corp"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Start</label>
+                        <Input
+                          value={exp.start}
+                          onChange={(e) => {
+                            const next = [...(profile.experience || [])];
+                            next[idx] = { ...next[idx], start: e.target.value };
+                            setProfile({ ...profile, experience: next });
+                          }}
+                          placeholder="Jan 2021"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">End</label>
+                        <Input
+                          value={exp.end || ""}
+                          onChange={(e) => {
+                            const next = [...(profile.experience || [])];
+                            next[idx] = { ...next[idx], end: e.target.value };
+                            setProfile({ ...profile, experience: next });
+                          }}
+                          placeholder="Present"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Description</label>
+                      <Textarea
+                        value={exp.description || ""}
+                        onChange={(e) => {
+                          const next = [...(profile.experience || [])];
+                          next[idx] = { ...next[idx], description: e.target.value };
+                          setProfile({ ...profile, experience: next });
+                        }}
+                        placeholder="Key responsibilities, tech used, achievements..."
+                        rows={3}
+                      />
+                    </div>
+                    <div className="flex justify-end">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          const next = (profile.experience || []).filter((x) => x.id !== exp.id);
+                          setProfile({ ...profile, experience: next });
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Education */}
+            <div className="card-gradient p-6 rounded-lg space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-orbitron text-xl font-bold">Education</h2>
+                <div className="flex items-center gap-2">
+                  {(profile.education || []).length > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        if (window.confirm("Remove all education entries?")) {
+                          setPrevEducation([...(profile.education || [])]);
+                          setProfile({ ...profile, education: [] });
+                          toast.message("Cleared education", { description: "Click Undo to restore." });
+                        }
+                      }}
+                    >
+                      Clear All
+                    </Button>
+                  )}
+                  {prevEducation && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setProfile({ ...profile, education: prevEducation });
+                        setPrevEducation(null);
+                        toast.success("Education restored");
+                      }}
+                    >
+                      Undo Clear
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      setProfile({
+                        ...profile,
+                        education: [
+                          ...(profile.education || []),
+                          {
+                            id: Date.now().toString(),
+                            degree: "",
+                            institution: "",
+                            start: "",
+                            end: "",
+                            description: "",
+                          },
+                        ],
+                      })
+                    }
+                  >
+                    Add Education
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                {(profile.education || []).map((edu, idx) => (
+                  <div
+                    key={edu.id}
+                    className="p-4 rounded-lg bg-card/40 border border-border/50 space-y-3"
+                    draggable
+                    onDragStart={(e) => onDragStart(e, idx, "education")}
+                    onDragOver={onDragOver}
+                    onDrop={(e) => onDrop(e, idx, "education")}
+                  >
+                    <div className="flex items-center gap-2 text-foreground/60">
+                      <GripVertical className="h-4 w-4" />
+                      <span className="text-xs">Drag to reorder</span>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Degree</label>
+                        <Input
+                          value={edu.degree}
+                          onChange={(e) => {
+                            const next = [...(profile.education || [])];
+                            next[idx] = { ...next[idx], degree: e.target.value };
+                            setProfile({ ...profile, education: next });
+                          }}
+                          placeholder="B.Sc. Computer Science"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Institution</label>
+                        <Input
+                          value={edu.institution}
+                          onChange={(e) => {
+                            const next = [...(profile.education || [])];
+                            next[idx] = { ...next[idx], institution: e.target.value };
+                            setProfile({ ...profile, education: next });
+                          }}
+                          placeholder="University Name"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Start</label>
+                        <Input
+                          value={edu.start}
+                          onChange={(e) => {
+                            const next = [...(profile.education || [])];
+                            next[idx] = { ...next[idx], start: e.target.value };
+                            setProfile({ ...profile, education: next });
+                          }}
+                          placeholder="2017"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">End</label>
+                        <Input
+                          value={edu.end || ""}
+                          onChange={(e) => {
+                            const next = [...(profile.education || [])];
+                            next[idx] = { ...next[idx], end: e.target.value };
+                            setProfile({ ...profile, education: next });
+                          }}
+                          placeholder="2021"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Description</label>
+                      <Textarea
+                        value={edu.description || ""}
+                        onChange={(e) => {
+                          const next = [...(profile.education || [])];
+                          next[idx] = { ...next[idx], description: e.target.value };
+                          setProfile({ ...profile, education: next });
+                        }}
+                        placeholder="Honors, activities, notable courses..."
+                        rows={3}
+                      />
+                    </div>
+                    <div className="flex justify-end">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          const next = (profile.education || []).filter((x) => x.id !== edu.id);
+                          setProfile({ ...profile, education: next });
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 

@@ -2,12 +2,13 @@ import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Logo } from "./Logo";
 
 const navItems = [
   { name: "Home", path: "/" },
   { name: "About", path: "/about" },
   { name: "Projects", path: "/projects" },
-  { name: "Blog", path: "/blog" },
+  { name: "Services", path: "/services" },
   { name: "Contact", path: "/contact" },
 ];
 
@@ -21,9 +22,7 @@ export const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="font-orbitron text-2xl font-bold text-glow-cyan">
-            PORTFOLIO
-          </Link>
+          <Logo size="md" />
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">

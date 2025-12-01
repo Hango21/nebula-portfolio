@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { IdleLogout } from "./IdleLogout";
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -16,5 +17,10 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/admin/login" replace />;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <IdleLogout timeoutMs={5 * 60 * 1000} />
+      {children}
+    </>
+  );
 };
