@@ -26,6 +26,8 @@ export interface ProfileData {
   name: string;
   title: string;
   bio: string;
+  bioHome?: string;
+  bioAbout?: string;
   profileImage: string;
   email: string;
   phone: string;
@@ -43,6 +45,8 @@ export const DEFAULT_PROFILE: ProfileData = {
   name: "Your Name",
   title: "Full Stack Developer",
   bio: "With over 5 years of experience in web development, I specialize in creating elegant, efficient, and scalable solutions. My passion lies in transforming complex problems into simple, beautiful, and intuitive designs.",
+  bioHome: "With over 5 years of experience in web development, I specialize in creating elegant, efficient, and scalable solutions.",
+  bioAbout: "With over 5 years of experience in web development, I specialize in creating elegant, efficient, and scalable solutions. My passion lies in transforming complex problems into simple, beautiful, and intuitive designs.",
   profileImage: "https://i.pinimg.com/736x/0d/7a/c0/0d7ac03da06b6b967b4008d5b7682fd3.jpg",
   email: "contact@example.com",
   phone: "+1 (555) 123-4567",

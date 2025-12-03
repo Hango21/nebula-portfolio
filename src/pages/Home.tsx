@@ -72,7 +72,7 @@ export default function Home() {
               transition={{ delay: 0.5, duration: 0.8 }}
               className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed max-w-3xl mx-auto"
             >
-              {profile.bio.split('.')[0]}.
+              {profile.bioHome ?? `${profile.bio.split('.')[0]}.`}
             </motion.p>
 
             <motion.div

@@ -321,11 +321,31 @@ export default function AdminProfile() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Bio / About</label>
+                <label className="block text-sm font-medium mb-2">Home Intro (shows on Home)</label>
+                <Textarea
+                  value={profile.bioHome ?? ""}
+                  onChange={(e) => setProfile({ ...profile, bioHome: e.target.value })}
+                  placeholder="Short intro shown on the home hero"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">About Bio (shows on About page)</label>
+                <Textarea
+                  value={profile.bioAbout ?? profile.bio}
+                  onChange={(e) => setProfile({ ...profile, bioAbout: e.target.value })}
+                  placeholder="Detailed bio for the About page"
+                  rows={5}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Bio / About (legacy)</label>
                 <Textarea
                   value={profile.bio}
                   onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                  placeholder="Tell visitors about yourself..."
+                  placeholder="General bio kept for backwards compatibility"
                   rows={5}
                 />
               </div>

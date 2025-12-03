@@ -90,7 +90,7 @@ export default function About() {
               Hi, I'm {profile.name}
             </h2>
             <p className="text-muted-foreground mb-6 leading-relaxed">
-              {profile.bio}
+              {profile.bioAbout ?? profile.bio}
             </p>
             {profile.cvUrl && (
               <a href={profile.cvUrl} target="_blank" rel="noopener noreferrer">
