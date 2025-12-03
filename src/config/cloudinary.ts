@@ -1,6 +1,6 @@
 export const CLOUDINARY_CONFIG = {
-  cloudName: "ddym2iudt",
-  uploadPreset: "portfolio_preset"
+  cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME as string,
+  uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET as string
 };
 
 export const uploadToCloudinary = async (file: File): Promise<string> => {
