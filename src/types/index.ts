@@ -34,4 +34,5 @@ export interface Service {
   description: string;
   icon: string; // lucide-react icon name key
   createdAt: string;
+  featured?: boolean;
 }

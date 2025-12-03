@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Save } from "lucide-react";
+import * as Icons from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,6 +35,7 @@ export default function ServiceForm() {
   const [description, setDescription] = useState(existing?.description || "");
   const [icon, setIcon] = useState(existing?.icon || ICON_OPTIONS[0]);
   const [saving, setSaving] = useState(false);
+  const [featured, setFeatured] = useState<boolean>(existing?.featured ?? false);
 
   useEffect(() => {
     if (editing && !existing) {
@@ -51,10 +53,10 @@ export default function ServiceForm() {
     setSaving(true);
     try {
       if (editing && id) {
-        updateService(id, { title, description, icon });
+        updateService(id, { title, description, icon, featured });
         toast.success("Service updated");
       } else {
-        const payload: Omit<Service, "id" | "createdAt"> = { title, description, icon };
+        const payload: Omit<Service, "id" | "createdAt"> = { title, description, icon, featured } as any;
         addService(payload);
         toast.success("Service created");
       }
@@ -94,18 +96,38 @@ export default function ServiceForm() {
 
             <div>
               <label className="block text-sm font-medium mb-2">Icon</label>
-              <select
-                className="w-full rounded-md border bg-background px-3 py-2"
-                value={icon}
-                onChange={(e) => setIcon(e.target.value)}
-              >
-                {ICON_OPTIONS.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs text-muted-foreground mt-2">Choose a lucide icon name (e.g., Code2, Cloud, Gauge)</p>
+              <div className="grid grid-cols-5 gap-2">
+                {ICON_OPTIONS.map((opt) => {
+                  const IconCmp = (Icons as any)[opt] as React.ComponentType<any>;
+                  const active = icon === opt;
+                  return (
+                    <button
+                      type="button"
+                      key={opt}
+                      onClick={() => setIcon(opt)}
+                      className={`flex items-center justify-center rounded-md border px-2 py-2 transition-colors ${
+                        active ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"
+                      }`}
+                      title={opt}
+                    >
+                      {IconCmp ? <IconCmp className={active ? "text-primary" : "text-foreground/60"} /> : opt}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">Click to pick an icon. Current: {icon}</p>
+              <div className="mt-3 flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">Preview:</span>
+                {(() => {
+                  const Preview = (Icons as any)[icon] as React.ComponentType<any>;
+                  return Preview ? <Preview className="w-6 h-6 text-primary" /> : null;
+                })()}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <input id="featured" type="checkbox" checked={featured} onChange={(e) => setFeatured(e.target.checked)} />
+              <label htmlFor="featured" className="text-sm">Featured (show on Home)</label>
             </div>
 
             <Button type="submit" disabled={saving} className="w-full btn-glow-cyan" size="lg">

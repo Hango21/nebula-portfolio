@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import * as Icons from "lucide-react";
-import { getServices } from "@/utils/storage";
+import { getServices, seedServicesIfEmpty } from "@/utils/storage";
 import type { Service } from "@/types";
 
 export default function Services() {
   const [services, setServices] = useState<Service[]>([]);
 
   useEffect(() => {
+    seedServicesIfEmpty();
     setServices(getServices());
   }, []);
 

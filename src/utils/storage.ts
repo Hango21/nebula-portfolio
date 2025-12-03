@@ -151,3 +151,18 @@ export const deleteService = (id: string) => {
   const services = getServices().filter((s) => s.id !== id);
   saveServices(services);
 };
+
+export const seedServicesIfEmpty = () => {
+  const existing = getServices();
+  if (existing.length > 0) return;
+  const now = new Date().toISOString();
+  const defaults: Service[] = [
+    { id: (Date.now() + 1).toString(), title: "Web App Development", description: "Modern, responsive web apps with React and TypeScript.", icon: "Code2", createdAt: now, featured: true },
+    { id: (Date.now() + 2).toString(), title: "Cloud & DevOps", description: "CI/CD, deployments, and cloud architecture on Vercel/AWS.", icon: "Cloud", createdAt: now, featured: true },
+    { id: (Date.now() + 3).toString(), title: "Performance Optimization", description: "Core Web Vitals, Lighthouse, and runtime performance.", icon: "Gauge", createdAt: now, featured: true },
+    { id: (Date.now() + 4).toString(), title: "Security & Auth", description: "Auth flows and secure data handling with best practices.", icon: "Shield", createdAt: now },
+    { id: (Date.now() + 5).toString(), title: "Maintenance & Support", description: "Bug fixes, upgrades, and long‑term care for your app.", icon: "Wrench", createdAt: now },
+    { id: (Date.now() + 6).toString(), title: "UI/UX Polish", description: "Shadcn UI + Tailwind with smooth animations and a11y.", icon: "Sparkles", createdAt: now },
+  ];
+  saveServices(defaults);
+};
