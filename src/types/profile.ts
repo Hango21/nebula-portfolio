@@ -22,6 +22,19 @@ export interface Stat {
   label: string;
 }
 
+// Availability status: available (open to work / ready to freelance) or unavailable
+export type Availability = "available" | "unavailable";
+
+export type SkillCategory = "language" | "framework" | "library" | "database" | "tool";
+
+export interface Skill {
+  id: string;
+  name: string;
+  level: number; // 0 - 100
+  category?: SkillCategory;
+  logo?: string; // URL
+}
+
 export interface ProfileData {
   name: string;
   title: string;
@@ -39,6 +52,8 @@ export interface ProfileData {
   experience?: Experience[];
   education?: Education[];
   stats?: Stat[];
+  skills?: Skill[];
+  availability?: Availability;
 }
 
 export const DEFAULT_PROFILE: ProfileData = {
@@ -61,4 +76,49 @@ export const DEFAULT_PROFILE: ProfileData = {
     { id: "stat-years", number: "5+", label: "Years Experience" },
     { id: "stat-satisfaction", number: "100%", label: "Client Satisfaction" },
   ],
+  skills: [
+    {
+      id: "skill-react",
+      name: "React",
+      level: 95,
+      category: "framework",
+      logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg",
+    },
+    {
+      id: "skill-typescript",
+      name: "TypeScript",
+      level: 90,
+      category: "language",
+      logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg",
+    },
+    {
+      id: "skill-node",
+      name: "Node.js",
+      level: 88,
+      category: "framework",
+      logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg",
+    },
+    {
+      id: "skill-python",
+      name: "Python",
+      level: 85,
+      category: "language",
+      logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg",
+    },
+    {
+      id: "skill-aws",
+      name: "AWS",
+      level: 82,
+      category: "tool",
+      logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg",
+    },
+    {
+      id: "skill-docker",
+      name: "Docker",
+      level: 80,
+      category: "tool",
+      logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg",
+    },
+  ],
+  availability: "available",
 };

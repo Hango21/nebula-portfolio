@@ -19,6 +19,11 @@ export default function Contact() {
     message: "",
   });
   const [loading, setLoading] = useState(false);
+  const availability = (profile.availability || "available");
+  const availabilityLabel = availability === "available" ? "Available (Open to work / Ready to freelance)" : "Unavailable";
+  const availabilityClasses = availability === "unavailable"
+    ? "bg-rose-500/10 border-rose-500/40 text-rose-400"
+    : "bg-emerald-500/10 border-emerald-500/40 text-emerald-400";
 
   useEffect(() => {
     setProfile(getProfile());
@@ -126,11 +131,10 @@ export default function Contact() {
             </div>
 
             <div className="card-gradient p-8 rounded-lg">
-              <h3 className="font-orbitron text-xl font-bold mb-4">Business Hours</h3>
-              <div className="space-y-2 text-muted-foreground">
-                <p>Monday - Friday: 9:00 AM - 6:00 PM</p>
-                <p>Saturday: 9:00 AM - 12:00 PM</p>
-                <p> Sunday: Closed</p>
+              <h3 className="font-orbitron text-xl font-bold mb-4">Availability</h3>
+              <div className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm border ${availabilityClasses}`}>
+                <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: availability === 'unavailable' ? '#fb7185' : '#34d399' }} />
+                <span>{availabilityLabel}</span>
               </div>
             </div>
           </motion.div>

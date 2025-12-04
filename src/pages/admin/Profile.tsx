@@ -3,12 +3,14 @@ import { motion } from "framer-motion";
 import { Upload, X, Save, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { getProfile, saveProfile } from "@/utils/profile";
 import { uploadToCloudinary } from "@/config/cloudinary";
 import { toast } from "sonner";
-import { ProfileData, Experience, Education } from "@/types/profile";
+import { ProfileData, Experience, Education, SkillCategory, Availability } from "@/types/profile";
+import { CATEGORIES, catalogByCategory, SKILL_CATALOG } from "@/data/skillLogos";
 
 export default function AdminProfile() {
   const [profile, setProfile] = useState<ProfileData>(getProfile());
@@ -35,6 +37,25 @@ export default function AdminProfile() {
     } finally {
       setUploading(false);
     }
+  };
+
+  // ----- Drag & Drop for Skills (kept separate to avoid changing existing types) -----
+  const onDragStartSkill = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.dataTransfer.setData("index", String(index));
+    e.dataTransfer.setData("section", "skills");
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const onDropSkill = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+    e.preventDefault();
+    const dragIndex = Number(e.dataTransfer.getData("index"));
+    const dragSection = e.dataTransfer.getData("section");
+    if (dragSection !== "skills" || Number.isNaN(dragIndex)) return;
+
+    const list = [...(profile.skills || [])];
+    const [moved] = list.splice(dragIndex, 1);
+    list.splice(dropIndex, 0, moved);
+    setProfile({ ...profile, skills: list });
   };
 
   const handleCvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,6 +127,8 @@ export default function AdminProfile() {
       }
     }
 
+    // No additional validation for availability selector
+
     try {
       saveProfile(profile);
       toast.success("Profile updated successfully!");
@@ -171,6 +194,10 @@ export default function AdminProfile() {
                     className="w-full h-full object-cover"
                   />
                 </div>
+
+            
+
+            
                 <div className="flex-1">
                   {profile.profileImage ? (
                     <div className="space-y-3">
@@ -573,6 +600,26 @@ export default function AdminProfile() {
               </div>
             </div>
 
+            {/* Availability */}
+            <div className="card-gradient p-6 rounded-lg space-y-4">
+              <h2 className="font-orbitron text-xl font-bold mb-2">Availability</h2>
+              <p className="text-sm text-muted-foreground">Set your current availability status.</p>
+              <div className="max-w-sm">
+                <Select
+                  value={profile.availability || "available"}
+                  onValueChange={(val) => setProfile({ ...profile, availability: val as Availability })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select availability" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="available">Available (Open to work / Ready to freelance)</SelectItem>
+                    <SelectItem value="unavailable">Unavailable</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             {/* Education */}
             <div className="card-gradient p-6 rounded-lg space-y-4">
               <div className="flex items-center justify-between">
@@ -717,6 +764,196 @@ export default function AdminProfile() {
                         onClick={() => {
                           const next = (profile.education || []).filter((x) => x.id !== edu.id);
                           setProfile({ ...profile, education: next });
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Skills */}
+            <div className="card-gradient p-6 rounded-lg space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-orbitron text-xl font-bold">Technical Skills</h2>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      setProfile({
+                        ...profile,
+                        skills: [
+                          ...(profile.skills || []),
+                          { id: Date.now().toString(), name: "", level: 0 },
+                        ],
+                      })
+                    }
+                  >
+                    Add Skill
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {(profile.skills || []).map((sk, idx) => (
+                  <div
+                    key={sk.id}
+                    className="p-4 rounded-lg bg-card/40 border border-border/50 space-y-3"
+                    draggable
+                    onDragStart={(e) => onDragStartSkill(e, idx)}
+                    onDragOver={onDragOver}
+                    onDrop={(e) => onDropSkill(e, idx)}
+                  >
+                    <div className="flex items-center gap-2 text-foreground/60">
+                      <GripVertical className="h-4 w-4" />
+                      <span className="text-xs">Drag to reorder</span>
+                    </div>
+                    <div className="grid md:grid-cols-4 gap-4">
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium mb-2">Name</label>
+                        <Input
+                          value={sk.name}
+                          onChange={(e) => {
+                            const next = [...(profile.skills || [])];
+                            next[idx] = { ...next[idx], name: e.target.value };
+                            setProfile({ ...profile, skills: next });
+                          }}
+                          placeholder="e.g., React"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Level (0-100)</label>
+                        <Input
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={Number.isFinite((sk as any).level) ? sk.level : 0}
+                          onChange={(e) => {
+                            const v = Math.max(0, Math.min(100, Number(e.target.value)));
+                            const next = [...(profile.skills || [])];
+                            next[idx] = { ...next[idx], level: v };
+                            setProfile({ ...profile, skills: next });
+                          }}
+                          placeholder="90"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Category</label>
+                        <Select
+                          value={(sk.category as SkillCategory) || ""}
+                          onValueChange={(val) => {
+                            const next = [...(profile.skills || [])];
+                            // Reset logo if category changes to avoid mismatch
+                            next[idx] = { ...next[idx], category: val as SkillCategory, logo: undefined };
+                            setProfile({ ...profile, skills: next });
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {CATEGORIES.map((c) => (
+                              <SelectItem key={c.value} value={c.value}>
+                                {c.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-4 gap-4 items-end">
+                      <div className="md:col-span-3">
+                        <label className="block text-sm font-medium mb-2">Logo</label>
+                        <Select
+                          value={sk.logo || ""}
+                          onValueChange={(val) => {
+                            const next = [...(profile.skills || [])];
+                            next[idx] = { ...next[idx], logo: val };
+                            // Optionally set name if empty to the catalog name
+                            const found = SKILL_CATALOG.find((s) => s.logo === val);
+                            if (found && !next[idx].name) next[idx].name = found.name;
+                            setProfile({ ...profile, skills: next });
+                          }}
+                          disabled={!sk.category}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={sk.category ? "Select logo" : "Select category first"} />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-72 overflow-auto">
+                            {catalogByCategory(sk.category as SkillCategory).map((opt) => (
+                              <SelectItem key={opt.key} value={opt.logo}>
+                                {opt.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {sk.logo ? (
+                          <img src={sk.logo} alt={sk.name} className="h-8 w-8 object-contain" />
+                        ) : (
+                          <div className="h-8 w-8 rounded bg-muted/40 border border-border/50" />
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 mt-2">
+                      <div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          id={`skill-logo-${sk.id}`}
+                          className="hidden"
+                          disabled={uploading}
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            setUploading(true);
+                            try {
+                              const url = await uploadToCloudinary(file);
+                              const next = [...(profile.skills || [])];
+                              next[idx] = { ...next[idx], logo: url };
+                              setProfile({ ...profile, skills: next });
+                              toast.success("Icon uploaded");
+                            } catch (error) {
+                              toast.error("Failed to upload icon");
+                            } finally {
+                              setUploading(false);
+                              // reset input so same file can be chosen again
+                              (e.target as HTMLInputElement).value = "";
+                            }
+                          }}
+                        />
+                        <label htmlFor={`skill-logo-${sk.id}`}>
+                          <Button type="button" variant="outline" size="sm" disabled={uploading} asChild>
+                            <span className="cursor-pointer">{uploading ? "Uploading..." : "Upload Custom Icon"}</span>
+                          </Button>
+                        </label>
+                      </div>
+                      {sk.logo && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const next = [...(profile.skills || [])];
+                            next[idx] = { ...next[idx], logo: undefined };
+                            setProfile({ ...profile, skills: next });
+                          }}
+                        >
+                          Clear Icon
+                        </Button>
+                      )}
+                    </div>
+                    <div className="flex justify-end">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          const next = (profile.skills || []).filter((x) => x.id !== sk.id);
+                          setProfile({ ...profile, skills: next });
                         }}
                       >
                         Remove

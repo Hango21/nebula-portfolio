@@ -42,9 +42,11 @@ export default function Home() {
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
               className="inline-block mb-4"
             >
-              <div className="flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-4 py-2">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <span className="text-primary text-sm font-medium">Available for opportunities</span>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-4 py-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <span className="text-primary text-sm font-medium">Available for opportunities</span>
+                </div>
               </div>
             </motion.div>
 

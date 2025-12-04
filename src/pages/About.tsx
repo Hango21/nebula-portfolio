@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import { getProfile } from "@/utils/profile";
 import { ProfileData } from "@/types/profile";
 
-const skills = [
+type DisplaySkill = { name: string; level: number; logo?: string };
+
+const defaultSkills: DisplaySkill[] = [
   { name: "React", level: 95 },
   { name: "TypeScript", level: 90 },
   { name: "Node.js", level: 88 },
@@ -44,6 +46,9 @@ const education = [
 
 export default function About() {
   const [profile, setProfile] = useState<ProfileData>(getProfile());
+  const skills: DisplaySkill[] = (profile.skills && profile.skills.length > 0)
+    ? profile.skills.map(s => ({ name: s.name, level: s.level, logo: s.logo }))
+    : defaultSkills;
 
   useEffect(() => {
     setProfile(getProfile());
@@ -71,11 +76,11 @@ export default function About() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <div className="aspect-square rounded-lg overflow-hidden border-gradient">
+            <div className="group aspect-[4/5] max-w-xs md:max-w-sm mx-auto rounded-lg overflow-hidden border-gradient">
               <img
                 src={profile.profileImage}
                 alt={profile.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
               />
             </div>
           </motion.div>
@@ -86,9 +91,7 @@ export default function About() {
             transition={{ delay: 0.3 }}
             className="flex flex-col justify-center"
           >
-            <h2 className="font-orbitron text-3xl font-bold mb-4">
-              Hi, I'm {profile.name}
-            </h2>
+            <h2 className="font-orbitron text-3xl font-bold mb-2">Hi, I'm {profile.name}</h2>
             <p className="text-muted-foreground mb-6 leading-relaxed">
               {profile.bioAbout ?? profile.bio}
             </p>
@@ -123,8 +126,13 @@ export default function About() {
                 transition={{ delay: index * 0.1 }}
                 className="card-gradient p-6 rounded-lg"
               >
-                <div className="flex justify-between mb-2">
-                  <span className="font-semibold">{skill.name}</span>
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center gap-2">
+                    {skill.logo ? (
+                      <img src={skill.logo} alt={skill.name} className="h-5 w-5 object-contain" />
+                    ) : null}
+                    <span className="font-semibold">{skill.name}</span>
+                  </div>
                   <span className="text-primary">{skill.level}%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
