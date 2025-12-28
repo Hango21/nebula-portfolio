@@ -14,12 +14,12 @@ const mapRowToProfile = (row: any): ProfileData => ({
   github: row.github ?? DEFAULT_PROFILE.github,
   linkedin: row.linkedin ?? DEFAULT_PROFILE.linkedin,
   twitter: row.twitter ?? DEFAULT_PROFILE.twitter,
-  cvUrl: DEFAULT_PROFILE.cvUrl,
-  experience: DEFAULT_PROFILE.experience,
-  education: DEFAULT_PROFILE.education,
-  stats: DEFAULT_PROFILE.stats,
-  skills: DEFAULT_PROFILE.skills,
-  availability: DEFAULT_PROFILE.availability,
+  cvUrl: row.cv_url ?? DEFAULT_PROFILE.cvUrl,
+  experience: Array.isArray(row.experience) ? row.experience : DEFAULT_PROFILE.experience,
+  education: Array.isArray(row.education) ? row.education : DEFAULT_PROFILE.education,
+  stats: Array.isArray(row.stats) ? row.stats : DEFAULT_PROFILE.stats,
+  skills: Array.isArray(row.skills) ? row.skills : DEFAULT_PROFILE.skills,
+  availability: (row.availability as any) ?? DEFAULT_PROFILE.availability,
 });
 
 export const getProfile = async (): Promise<ProfileData> => {
@@ -98,6 +98,12 @@ export const saveProfile = async (profile: ProfileData): Promise<void> => {
       github: profile.github,
       linkedin: profile.linkedin,
       twitter: profile.twitter,
+      cv_url: profile.cvUrl ?? null,
+      experience: profile.experience ?? [],
+      education: profile.education ?? [],
+      stats: profile.stats ?? [],
+      skills: profile.skills ?? [],
+      availability: profile.availability ?? DEFAULT_PROFILE.availability,
     };
 
     if (!data) {
