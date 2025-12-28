@@ -9,25 +9,29 @@ import { toast } from "sonner";
 
 export default function AdminMessages() {
   const [messages, setMessages] = useState<ContactMessage[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadMessages();
   }, []);
 
-  const loadMessages = () => {
-    setMessages(getMessages());
+  const loadMessages = async () => {
+    setLoading(true);
+    const data = await getMessages();
+    setMessages(data);
+    setLoading(false);
   };
 
-  const handleToggleRead = (id: string, currentStatus: boolean) => {
-    markMessageAsRead(id, !currentStatus);
-    loadMessages();
+  const handleToggleRead = async (id: string, currentStatus: boolean) => {
+    await markMessageAsRead(id, !currentStatus);
+    await loadMessages();
     toast.success(currentStatus ? "Marked as unread" : "Marked as read");
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this message?")) {
-      deleteMessage(id);
-      loadMessages();
+      await deleteMessage(id);
+      await loadMessages();
       toast.success("Message deleted");
     }
   };
@@ -49,7 +53,11 @@ export default function AdminMessages() {
 
         <h1 className="font-orbitron text-3xl font-bold mb-8">Messages</h1>
 
-        {messages.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-20 card-gradient rounded-lg">
+            <p className="text-muted-foreground">Loading messages...</p>
+          </div>
+        ) : messages.length === 0 ? (
           <div className="text-center py-20 card-gradient rounded-lg">
             <p className="text-muted-foreground">No messages yet</p>
           </div>

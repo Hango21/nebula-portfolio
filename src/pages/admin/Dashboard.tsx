@@ -15,18 +15,25 @@ export default function Dashboard() {
     messages: 0,
     unreadMessages: 0,
   });
+  const [recentMessages, setRecentMessages] = useState<any[]>([]);
 
   useEffect(() => {
-    const projects = getProjects();
-    const posts = getBlogPosts();
-    const messages = getMessages();
-    
-    setStats({
-      projects: projects.length,
-      posts: posts.length,
-      messages: messages.length,
-      unreadMessages: messages.filter((m) => !m.read).length,
-    });
+    const loadStats = async () => {
+      const projects = await getProjects();
+      const posts = await getBlogPosts();
+      const messages = await getMessages();
+
+      setStats({
+        projects: projects.length,
+        posts: posts.length,
+        messages: messages.length,
+        unreadMessages: messages.filter((m) => !m.read).length,
+      });
+
+      setRecentMessages(messages.slice(0, 3));
+    };
+
+    loadStats();
   }, []);
 
   const handleLogout = async () => {
@@ -147,7 +154,7 @@ export default function Dashboard() {
           >
             <h2 className="font-orbitron text-xl font-bold mb-4">Recent Activity</h2>
             <div className="space-y-4">
-              {getMessages().slice(0, 3).map((message) => (
+              {recentMessages.map((message) => (
                 <div key={message.id} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
                   <Mail className="w-4 h-4 text-primary mt-1 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
@@ -156,7 +163,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               ))}
-              {getMessages().length === 0 && (
+              {recentMessages.length === 0 && (
                 <p className="text-muted-foreground text-center py-4">No messages yet</p>
               )}
             </div>

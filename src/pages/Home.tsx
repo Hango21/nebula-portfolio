@@ -9,13 +9,26 @@ import { getServices } from "@/utils/storage";
 import type { Service } from "@/types";
 
 export default function Home() {
-  const [profile, setProfile] = useState<ProfileData>(getProfile());
+  const [profile, setProfile] = useState<ProfileData | null>(null);
   const [services, setServices] = useState<Service[]>([]);
 
   useEffect(() => {
-    setProfile(getProfile());
-    setServices(getServices());
+    const load = async () => {
+      const p = await getProfile();
+      setProfile(p);
+      const s = await getServices();
+      setServices(s);
+    };
+    load();
   }, []);
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Loading profile...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">

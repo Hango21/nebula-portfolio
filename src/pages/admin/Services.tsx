@@ -4,23 +4,29 @@ import { motion } from "framer-motion";
 import { Plus, Edit, Trash2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdminNav } from "@/components/admin/AdminNav";
-import { getServices, deleteService, saveServices } from "@/utils/storage";
+import { getServices, deleteService, reorderServices } from "@/utils/storage";
 import type { Service } from "@/types";
 import { toast } from "sonner";
 
 export default function AdminServices() {
   const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     load();
   }, []);
 
-  const load = () => setServices(getServices());
+  const load = async () => {
+    setLoading(true);
+    const data = await getServices();
+    setServices(data);
+    setLoading(false);
+  };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Delete this service?")) {
-      deleteService(id);
-      load();
+      await deleteService(id);
+      await load();
       toast.success("Service deleted");
     }
   };
@@ -36,7 +42,7 @@ export default function AdminServices() {
     e.dataTransfer.dropEffect = "move";
   };
 
-  const onDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+  const onDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
     e.preventDefault();
     const dragIndex = Number(e.dataTransfer.getData("index"));
     if (Number.isNaN(dragIndex)) return;
@@ -44,7 +50,7 @@ export default function AdminServices() {
     const [moved] = next.splice(dragIndex, 1);
     next.splice(dropIndex, 0, moved);
     setServices(next);
-    saveServices(next);
+    await reorderServices(next);
     toast.success("Order saved");
   };
 
@@ -63,7 +69,11 @@ export default function AdminServices() {
           </Link>
         </div>
 
-        {services.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-20 card-gradient rounded-lg">
+            <p className="text-muted-foreground mb-4">Loading services...</p>
+          </div>
+        ) : services.length === 0 ? (
           <div className="text-center py-20 card-gradient rounded-lg">
             <p className="text-muted-foreground mb-4">No services yet</p>
             <Link to="/admin/services/new">

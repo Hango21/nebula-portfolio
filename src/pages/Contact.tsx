@@ -12,22 +12,35 @@ import { getProfile } from "@/utils/profile";
 import { ProfileData } from "@/types/profile";
 
 export default function Contact() {
-  const [profile, setProfile] = useState<ProfileData>(getProfile());
+  const [profile, setProfile] = useState<ProfileData | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     message: "",
   });
   const [loading, setLoading] = useState(false);
-  const availability = (profile.availability || "available");
+
+  useEffect(() => {
+    const load = async () => {
+      const p = await getProfile();
+      setProfile(p);
+    };
+    load();
+  }, []);
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen py-24 flex items-center justify-center">
+        <p className="text-muted-foreground">Loading profile...</p>
+      </div>
+    );
+  }
+
+  const availability = profile.availability || "available";
   const availabilityLabel = availability === "available" ? "Available (Open to work / Ready to freelance)" : "Unavailable";
   const availabilityClasses = availability === "unavailable"
     ? "bg-rose-500/10 border-rose-500/40 text-rose-400"
     : "bg-emerald-500/10 border-emerald-500/40 text-emerald-400";
-
-  useEffect(() => {
-    setProfile(getProfile());
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,12 +53,18 @@ export default function Contact() {
     setLoading(true);
 
     try {
-      // Save to local storage
-      addMessage({
+      // Save to Supabase
+      const saved = await addMessage({
         name: formData.name,
         email: formData.email,
         message: formData.message,
       });
+
+      if (!saved) {
+        toast.error("Failed to save message");
+        setLoading(false);
+        return;
+      }
 
       // Send email via EmailJS
       await emailjs.send(

@@ -6,10 +6,17 @@ import type { Service } from "@/types";
 
 export default function Services() {
   const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    seedServicesIfEmpty();
-    setServices(getServices());
+    const load = async () => {
+      setLoading(true);
+      await seedServicesIfEmpty();
+      const data = await getServices();
+      setServices(data);
+      setLoading(false);
+    };
+    load();
   }, []);
 
   const renderIcon = (iconName: string) => {
@@ -34,7 +41,9 @@ export default function Services() {
           </p>
         </motion.div>
 
-        {services.length === 0 ? (
+        {loading ? (
+          <div className="text-center text-muted-foreground">Loading services...</div>
+        ) : services.length === 0 ? (
           <div className="text-center text-muted-foreground">No services yet. Add some in the admin panel.</div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

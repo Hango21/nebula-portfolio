@@ -7,9 +7,16 @@ import { BlogPost } from "@/types";
 
 export default function Blog() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setPosts(getBlogPosts());
+    const load = async () => {
+      setLoading(true);
+      const data = await getBlogPosts();
+      setPosts(data);
+      setLoading(false);
+    };
+    load();
   }, []);
 
   const formatDate = (dateString: string) => {
@@ -37,7 +44,15 @@ export default function Blog() {
           </p>
         </motion.div>
 
-        {posts.length === 0 ? (
+        {loading ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
+            <p className="text-muted-foreground text-lg">Loading posts...</p>
+          </motion.div>
+        ) : posts.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Save } from "lucide-react";
@@ -26,23 +26,36 @@ const ICON_OPTIONS = [
 export default function ServiceForm() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const services = useMemo(() => getServices(), []);
-
   const editing = Boolean(id);
-  const existing = editing ? services.find((s) => s.id === id) : undefined;
 
-  const [title, setTitle] = useState(existing?.title || "");
-  const [description, setDescription] = useState(existing?.description || "");
-  const [icon, setIcon] = useState(existing?.icon || ICON_OPTIONS[0]);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [icon, setIcon] = useState(ICON_OPTIONS[0]);
   const [saving, setSaving] = useState(false);
-  const [featured, setFeatured] = useState<boolean>(existing?.featured ?? false);
+  const [featured, setFeatured] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(editing);
 
   useEffect(() => {
-    if (editing && !existing) {
-      toast.error("Service not found");
-      navigate("/admin/services", { replace: true });
-    }
-  }, [editing, existing, navigate]);
+    if (!editing || !id) return;
+
+    const load = async () => {
+      setLoading(true);
+      const services = await getServices();
+      const existing = services.find((s) => s.id === id);
+      if (!existing) {
+        toast.error("Service not found");
+        navigate("/admin/services", { replace: true });
+        return;
+      }
+      setTitle(existing.title);
+      setDescription(existing.description);
+      setIcon(existing.icon);
+      setFeatured(existing.featured ?? false);
+      setLoading(false);
+    };
+
+    load();
+  }, [editing, id, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,11 +66,15 @@ export default function ServiceForm() {
     setSaving(true);
     try {
       if (editing && id) {
-        updateService(id, { title, description, icon, featured });
+        await updateService(id, { title, description, icon, featured });
         toast.success("Service updated");
       } else {
         const payload: Omit<Service, "id" | "createdAt"> = { title, description, icon, featured } as any;
-        addService(payload);
+        const created = await addService(payload);
+        if (!created) {
+          toast.error("Failed to create service");
+          return;
+        }
         toast.success("Service created");
       }
       navigate("/admin/services");
@@ -67,6 +84,14 @@ export default function ServiceForm() {
       setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen py-24 flex items-center justify-center">
+        <p className="text-muted-foreground">Loading service...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen py-24">

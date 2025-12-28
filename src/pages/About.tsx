@@ -45,14 +45,27 @@ const education = [
 ];
 
 export default function About() {
-  const [profile, setProfile] = useState<ProfileData>(getProfile());
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      const p = await getProfile();
+      setProfile(p);
+    };
+    load();
+  }, []);
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen py-24 flex items-center justify-center">
+        <p className="text-muted-foreground">Loading profile...</p>
+      </div>
+    );
+  }
+
   const skills: DisplaySkill[] = (profile.skills && profile.skills.length > 0)
     ? profile.skills.map(s => ({ name: s.name, level: s.level, logo: s.logo }))
     : defaultSkills;
-
-  useEffect(() => {
-    setProfile(getProfile());
-  }, []);
 
   return (
     <div className="min-h-screen py-24">

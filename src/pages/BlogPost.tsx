@@ -9,12 +9,26 @@ import { BlogPost as BlogPostType } from "@/types";
 export default function BlogPost() {
   const { id } = useParams();
   const [post, setPost] = useState<BlogPostType | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const posts = getBlogPosts();
-    const foundPost = posts.find((p) => p.id === id);
-    setPost(foundPost || null);
+    const load = async () => {
+      setLoading(true);
+      const posts = await getBlogPosts();
+      const foundPost = posts.find((p) => p.id === id);
+      setPost(foundPost || null);
+      setLoading(false);
+    };
+    load();
   }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Loading post...</p>
+      </div>
+    );
+  }
 
   if (!post) {
     return (

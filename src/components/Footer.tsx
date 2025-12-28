@@ -6,10 +6,14 @@ import { Logo } from "./Logo";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const [profile, setProfile] = useState<ProfileData>(getProfile());
+  const [profile, setProfile] = useState<ProfileData | null>(null);
 
   useEffect(() => {
-    setProfile(getProfile());
+    const load = async () => {
+      const p = await getProfile();
+      setProfile(p);
+    };
+    load();
   }, []);
 
   return (
@@ -18,38 +22,40 @@ export const Footer = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <Logo size="sm" />
 
-          <div className="flex items-center gap-6">
-            <a
-              href={profile.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-foreground/60 hover:text-primary transition-colors"
-            >
-              <Github size={20} />
-            </a>
-            <a
-              href={profile.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-foreground/60 hover:text-primary transition-colors"
-            >
-              <Linkedin size={20} />
-            </a>
-            <a
-              href={profile.twitter}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-foreground/60 hover:text-primary transition-colors"
-            >
-              <Twitter size={20} />
-            </a>
-            <a
-              href={`mailto:${profile.email}`}
-              className="text-foreground/60 hover:text-primary transition-colors"
-            >
-              <Mail size={20} />
-            </a>
-          </div>
+          {profile && (
+            <div className="flex items-center gap-6">
+              <a
+                href={profile.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-foreground/60 hover:text-primary transition-colors"
+              >
+                <Github size={20} />
+              </a>
+              <a
+                href={profile.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-foreground/60 hover:text-primary transition-colors"
+              >
+                <Linkedin size={20} />
+              </a>
+              <a
+                href={profile.twitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-foreground/60 hover:text-primary transition-colors"
+              >
+                <Twitter size={20} />
+              </a>
+              <a
+                href={`mailto:${profile.email}`}
+                className="text-foreground/60 hover:text-primary transition-colors"
+              >
+                <Mail size={20} />
+              </a>
+            </div>
+          )}
 
           <div className="text-muted-foreground text-sm">
             © {currentYear} All rights reserved

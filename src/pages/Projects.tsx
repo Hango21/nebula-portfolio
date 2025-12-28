@@ -8,9 +8,16 @@ import { Project } from "@/types";
 
 export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setProjects(getProjects());
+    const load = async () => {
+      setLoading(true);
+      const data = await getProjects();
+      setProjects(data);
+      setLoading(false);
+    };
+    load();
   }, []);
 
   return (
@@ -30,7 +37,15 @@ export default function Projects() {
           </p>
         </motion.div>
 
-        {projects.length === 0 ? (
+        {loading ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
+            <p className="text-muted-foreground text-lg">Loading projects...</p>
+          </motion.div>
+        ) : projects.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

@@ -13,14 +13,18 @@ import { ProfileData, Experience, Education, SkillCategory, Availability } from 
 import { CATEGORIES, catalogByCategory, SKILL_CATALOG } from "@/data/skillLogos";
 
 export default function AdminProfile() {
-  const [profile, setProfile] = useState<ProfileData>(getProfile());
+  const [profile, setProfile] = useState<ProfileData | null>(null);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [prevExperience, setPrevExperience] = useState<Experience[] | null>(null);
   const [prevEducation, setPrevEducation] = useState<Education[] | null>(null);
 
   useEffect(() => {
-    setProfile(getProfile());
+    const load = async () => {
+      const p = await getProfile();
+      setProfile(p);
+    };
+    load();
   }, []);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,8 +133,14 @@ export default function AdminProfile() {
 
     // No additional validation for availability selector
 
+    if (!profile) {
+      toast.error("Profile not loaded yet");
+      setSaving(false);
+      return;
+    }
+
     try {
-      saveProfile(profile);
+      await saveProfile(profile);
       toast.success("Profile updated successfully!");
     } catch (error) {
       toast.error("Failed to save profile");
@@ -169,6 +179,14 @@ export default function AdminProfile() {
       setProfile({ ...profile, education: list });
     }
   };
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen py-24 flex items-center justify-center">
+        <p className="text-muted-foreground">Loading profile...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen py-24">

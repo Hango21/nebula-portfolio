@@ -10,19 +10,23 @@ import { toast } from "sonner";
 
 export default function AdminBlog() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadPosts();
   }, []);
 
-  const loadPosts = () => {
-    setPosts(getBlogPosts());
+  const loadPosts = async () => {
+    setLoading(true);
+    const data = await getBlogPosts();
+    setPosts(data);
+    setLoading(false);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this post?")) {
-      deleteBlogPost(id);
-      loadPosts();
+      await deleteBlogPost(id);
+      await loadPosts();
       toast.success("Post deleted successfully");
     }
   };
@@ -50,7 +54,11 @@ export default function AdminBlog() {
           </Link>
         </div>
 
-        {posts.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-20 card-gradient rounded-lg">
+            <p className="text-muted-foreground mb-4">Loading posts...</p>
+          </div>
+        ) : posts.length === 0 ? (
           <div className="text-center py-20 card-gradient rounded-lg">
             <p className="text-muted-foreground mb-4">No blog posts yet</p>
             <Link to="/admin/blog/new">

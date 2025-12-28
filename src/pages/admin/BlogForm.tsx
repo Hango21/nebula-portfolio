@@ -26,22 +26,32 @@ export default function BlogForm() {
   });
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(isEdit);
 
   useEffect(() => {
-    if (isEdit) {
-      const posts = getBlogPosts();
+    if (!isEdit || !id) return;
+
+    const load = async () => {
+      setLoading(true);
+      const posts = await getBlogPosts();
       const post = posts.find((p) => p.id === id);
-      if (post) {
-        setFormData({
-          title: post.title,
-          excerpt: post.excerpt,
-          content: post.content,
-          coverImage: post.coverImage,
-          author: post.author,
-        });
+      if (!post) {
+        toast.error("Post not found");
+        navigate("/admin/blog", { replace: true });
+        return;
       }
-    }
-  }, [id, isEdit]);
+      setFormData({
+        title: post.title,
+        excerpt: post.excerpt,
+        content: post.content,
+        coverImage: post.coverImage,
+        author: post.author,
+      });
+      setLoading(false);
+    };
+
+    load();
+  }, [id, isEdit, navigate]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -70,10 +80,15 @@ export default function BlogForm() {
     setSaving(true);
     try {
       if (isEdit && id) {
-        updateBlogPost(id, formData);
+        await updateBlogPost(id, formData);
         toast.success("Post updated successfully");
       } else {
-        addBlogPost(formData);
+        const created = await addBlogPost(formData as any);
+        if (!created) {
+          toast.error("Failed to create post");
+          setSaving(false);
+          return;
+        }
         toast.success("Post created successfully");
       }
       navigate("/admin/blog");
@@ -83,6 +98,14 @@ export default function BlogForm() {
       setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen py-24 flex items-center justify-center">
+        <p className="text-muted-foreground">Loading post...</p>
+      </div>
+    );
+  }
 
   const modules = {
     toolbar: [

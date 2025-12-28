@@ -30,18 +30,21 @@ export default function ProjectForm() {
 
   useEffect(() => {
     if (isEdit) {
-      const projects = getProjects();
-      const project = projects.find((p) => p.id === id);
-      if (project) {
-        setFormData({
-          title: project.title,
-          description: project.description,
-          image: project.image,
-          techStack: project.techStack,
-          githubLink: project.githubLink || "",
-          demoLink: project.demoLink || "",
-        });
-      }
+      const loadProject = async () => {
+        const projects = await getProjects();
+        const project = projects.find((p) => p.id === id);
+        if (project) {
+          setFormData({
+            title: project.title,
+            description: project.description,
+            image: project.image,
+            techStack: project.techStack,
+            githubLink: project.githubLink || "",
+            demoLink: project.demoLink || "",
+          });
+        }
+      };
+      loadProject();
     }
   }, [id, isEdit]);
 
@@ -89,10 +92,14 @@ export default function ProjectForm() {
     setSaving(true);
     try {
       if (isEdit && id) {
-        updateProject(id, formData);
+        await updateProject(id, formData);
         toast.success("Project updated successfully");
       } else {
-        addProject(formData);
+        const created = await addProject(formData);
+        if (!created) {
+          toast.error("Failed to create project");
+          return;
+        }
         toast.success("Project created successfully");
       }
       navigate("/admin/projects");

@@ -11,19 +11,23 @@ import { toast } from "sonner";
 
 export default function AdminProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const loadProjects = async () => {
+      setLoading(true);
+      const data = await getProjects();
+      setProjects(data);
+      setLoading(false);
+    };
     loadProjects();
   }, []);
 
-  const loadProjects = () => {
-    setProjects(getProjects());
-  };
-
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this project?")) {
-      deleteProject(id);
-      loadProjects();
+      await deleteProject(id);
+      const data = await getProjects();
+      setProjects(data);
       toast.success("Project deleted successfully");
     }
   };
@@ -43,7 +47,11 @@ export default function AdminProjects() {
           </Link>
         </div>
 
-        {projects.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-20 card-gradient rounded-lg">
+            <p className="text-muted-foreground mb-4">Loading projects...</p>
+          </div>
+        ) : projects.length === 0 ? (
           <div className="text-center py-20 card-gradient rounded-lg">
             <p className="text-muted-foreground mb-4">No projects yet</p>
             <Link to="/admin/projects/new">
