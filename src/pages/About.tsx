@@ -16,7 +16,7 @@ const defaultSkills: DisplaySkill[] = [
   { name: "Docker", level: 80 },
 ];
 
-const experience = [
+const defaultExperience = [
   {
     title: "Senior Full Stack Developer",
     company: "Tech Company Inc.",
@@ -31,7 +31,7 @@ const experience = [
   },
 ];
 
-const education = [
+const defaultEducation = [
   {
     degree: "Master of Computer Science",
     school: "University of Technology",
@@ -66,6 +66,27 @@ export default function About() {
   const skills: DisplaySkill[] = (profile.skills && profile.skills.length > 0)
     ? profile.skills.map(s => ({ name: s.name, level: s.level, logo: s.logo }))
     : defaultSkills;
+
+  const experienceList = (profile.experience && profile.experience.length > 0)
+    ? profile.experience.map(exp => ({
+        title: exp.role,
+        company: exp.company,
+        period: exp.start && exp.end
+          ? `${exp.start} - ${exp.end}`
+          : exp.start || exp.end || "",
+        description: exp.description || "",
+      }))
+    : defaultExperience;
+
+  const educationList = (profile.education && profile.education.length > 0)
+    ? profile.education.map(edu => ({
+        degree: edu.degree,
+        school: edu.institution,
+        period: edu.start && edu.end
+          ? `${edu.start} - ${edu.end}`
+          : edu.start || edu.end || "",
+      }))
+    : defaultEducation;
 
   return (
     <div className="min-h-screen py-24">
@@ -174,7 +195,7 @@ export default function About() {
             Experience
           </h2>
           <div className="space-y-6 max-w-3xl mx-auto">
-            {experience.map((exp, index) => (
+            {experienceList.map((exp, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -203,7 +224,7 @@ export default function About() {
             Education
           </h2>
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {education.map((edu, index) => (
+            {educationList.map((edu, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.9 }}
